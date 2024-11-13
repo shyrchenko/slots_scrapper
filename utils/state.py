@@ -3,8 +3,8 @@ from pathlib import Path
 from distutils.util import strtobool
 
 state = {
-    "debug": bool(strtobool(os.environ.get('DEBUG', 'True'))),
-    "debug_dir": Path('./debug')
+    "debug": bool(strtobool(os.environ.get("DEBUG", "True"))),
+    "debug_dir": Path("./debug"),
 }
 
 

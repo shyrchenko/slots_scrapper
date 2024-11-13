@@ -14,8 +14,13 @@ from selenium.common.exceptions import NoSuchElementException
 from skimage.io import imsave
 
 from frame_processing import process_frame
-from frame_processing.symbols_identification.symbols_identifier import CorrSymbolIdentifier, SymbolsProcessor
-from frame_processing.symbols_images_extraction.symbols_images_extractor import SymbolsImagesExtractor
+from frame_processing.symbols_identification.symbols_identifier import (
+    CorrSymbolIdentifier,
+    SymbolsProcessor,
+)
+from frame_processing.symbols_images_extraction.symbols_images_extractor import (
+    SymbolsImagesExtractor,
+)
 from utils.data_models import SymbolsGrid, Vector, ROI
 from utils.image_processing import crop_image
 from utils.io import read_expected_symbols
@@ -32,7 +37,7 @@ class LiveProcessor:
         symbols_images_extractor: SymbolsImagesExtractor,
         symbols_processor: SymbolsProcessor,
         grid: SymbolsGrid,
-        roi: ROI
+        roi: ROI,
     ):
         self._symbols_images_extractor = symbols_images_extractor
         self._symbols_processor = symbols_processor
@@ -53,7 +58,6 @@ class LiveProcessor:
             except NoSuchElementException:
                 number_of_retries += 1
 
-
     def _set_up(self):
         self._driver.get(self.LINK)
 
@@ -68,26 +72,30 @@ class LiveProcessor:
 
         self._driver.switch_to.frame(0)
 
-        button = self._driver.find_element(By.XPATH, "//button[@id='action-start-game']")
+        button = self._driver.find_element(
+            By.XPATH, "//button[@id='action-start-game']"
+        )
         button.click()
         time.sleep(1)
 
-        self._refresh_button = self._driver.find_element(By.XPATH, "//button[@id='actions-spin']")
+        self._refresh_button = self._driver.find_element(
+            By.XPATH, "//button[@id='actions-spin']"
+        )
 
     def _is_frame_valid(self):
         frame_is_valid = True
         try:
-            self._driver.find_element(By.CLASS_NAME, 'spin__button--stop')
+            self._driver.find_element(By.CLASS_NAME, "spin__button--stop")
             frame_is_valid = False
         except NoSuchElementException:
             pass
-        logger.debug(f'Frame is valid: {frame_is_valid}')
+        logger.debug(f"Frame is valid: {frame_is_valid}")
         return frame_is_valid
 
     def process_frames(self, interval: int) -> Dict[str, Optional[dict]]:
         if is_debug_mode_activated():
             execution_id = str(uuid.uuid4())
-            set_debug_dir(Path(f'./debug/{execution_id}'))
+            set_debug_dir(Path(f"./debug/{execution_id}"))
 
         s = time.time()
 
@@ -97,7 +105,7 @@ class LiveProcessor:
             detected = False
             not_detected = 0
             while not detected:
-                frame_name = f'frame_{frames}'
+                frame_name = f"frame_{frames}"
                 if not_detected > 3:
                     break
                 if not self._is_frame_valid():
@@ -107,7 +115,7 @@ class LiveProcessor:
                 im_bytes = BytesIO(self._driver.get_screenshot_as_png())
                 frame_image = Image.open(im_bytes)
                 frame_image = np.array(frame_image)
-                logger.debug(f'Time of loading image: {time.time() - loading_start}')
+                logger.debug(f"Time of loading image: {time.time() - loading_start}")
 
                 frame_image = crop_image(frame_image, self._roi)
 
@@ -116,7 +124,7 @@ class LiveProcessor:
                     frame_name=frame_name,
                     symbols_extractor=self._symbols_images_extractor,
                     reels_processor=self._symbols_processor,
-                    grid=self._grid
+                    grid=self._grid,
                 )
                 if result_per_frame is None:
                     not_detected += 1
@@ -132,29 +140,24 @@ class LiveProcessor:
         return result
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import json
 
     ex = SymbolsImagesExtractor()
-    identifier = CorrSymbolIdentifier(
-        read_expected_symbols(Path(r'../symbols'))
-    )
+    identifier = CorrSymbolIdentifier(read_expected_symbols(Path(r"../symbols")))
     processor = SymbolsProcessor(identifier)
     grid = SymbolsGrid(
         start_point=Vector(x=45, y=85),
         symbol_size=Vector(x=185, y=140),
         offset=Vector(x=0, y=20),
-        number_of_elements=Vector(x=5, y=3)
+        number_of_elements=Vector(x=5, y=3),
     )
     roi = ROI(450, 1500, 129, 729)
 
     e = LiveProcessor(
-        symbols_images_extractor=ex,
-        symbols_processor=processor,
-        roi=roi,
-        grid=grid
+        symbols_images_extractor=ex, symbols_processor=processor, roi=roi, grid=grid
     )
     r = e.process_frames(60)
 
-    with open(get_debug_dir() / 'result.json', 'w') as f:
+    with open(get_debug_dir() / "result.json", "w") as f:
         json.dump(r, f)

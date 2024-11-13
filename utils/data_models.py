@@ -11,7 +11,12 @@ class ROI:
         self.y_bottom = y_bottom
 
     def to_dict(self):
-        return dict(x_left=self.x_left, x_right=self.x_right, y_top=self.y_top, y_bottom=self.y_bottom)
+        return dict(
+            x_left=self.x_left,
+            x_right=self.x_right,
+            y_top=self.y_top,
+            y_bottom=self.y_bottom,
+        )
 
 
 class Vector:
@@ -52,7 +57,7 @@ class SymbolsGrid:
         start_point: Vector,
         symbol_size: Vector,
         number_of_elements: Vector,
-        offset: Vector = Vector(0, 0)
+        offset: Vector = Vector(0, 0),
     ):
         self.start_point = start_point
         self.symbol_size = symbol_size
@@ -63,16 +68,26 @@ class SymbolsGrid:
     def cells(self) -> List[GridCell]:
         cells = []
         for row_index in range(self.number_of_elements.y):
-            y_top = self.start_point.y + (self.symbol_size.y + self.offset.y) * row_index
+            y_top = (
+                self.start_point.y + (self.symbol_size.y + self.offset.y) * row_index
+            )
             y_bottom = y_top + self.symbol_size.y
 
             for columns_index in range(self.number_of_elements.x):
-                x_left = self.start_point.x + (self.symbol_size.x + self.offset.x) * columns_index
+                x_left = (
+                    self.start_point.x
+                    + (self.symbol_size.x + self.offset.x) * columns_index
+                )
                 x_right = x_left + self.symbol_size.x
                 cells.append(
                     GridCell(
                         index=Vector(x=columns_index, y=row_index),
-                        roi=ROI(x_left=x_left, x_right=x_right, y_top=y_top, y_bottom=y_bottom)
+                        roi=ROI(
+                            x_left=x_left,
+                            x_right=x_right,
+                            y_top=y_top,
+                            y_bottom=y_bottom,
+                        ),
                     )
                 )
         return cells
@@ -95,7 +110,4 @@ class Reel:
         return f"{self.symbols}"
 
     def to_dict(self):
-        return {
-            index: symbol.name
-            for index, symbol in self.symbols.items()
-        }
+        return {index: symbol.name for index, symbol in self.symbols.items()}

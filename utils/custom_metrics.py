@@ -11,10 +11,7 @@ _corr = np.vectorize(_corr, signature="(n), (n) ->()")
 
 
 def window_correlation(
-    img1: np.ndarray,
-    img2: np.ndarray,
-    windows_part: float = 0.1,
-    windows_step: int = 3
+    img1: np.ndarray, img2: np.ndarray, windows_part: float = 0.1, windows_step: int = 3
 ) -> float:
     x_thresh = int(img2.shape[1] * windows_part)
     y_thresh = int(img2.shape[0] * windows_part)
@@ -32,7 +29,7 @@ def window_correlation(
     return result
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     img1 = np.random.randn(100, 100, 3)
     img2 = np.random.randn(100, 100, 3)
     print(window_correlation(img1, img2))

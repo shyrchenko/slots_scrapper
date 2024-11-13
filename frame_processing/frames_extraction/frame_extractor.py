@@ -44,4 +44,6 @@ class FramesExtractor:
             prev_frame = curr_frame
 
     def _is_frames_similar(self, frame_1: np.ndarray, frame_2: np.ndarray) -> bool:
-        return np.corrcoef(frame_1.flatten(), frame_2.flatten())[0][1] > self.CORR_THRESH
+        return (
+            np.corrcoef(frame_1.flatten(), frame_2.flatten())[0][1] > self.CORR_THRESH
+        )
